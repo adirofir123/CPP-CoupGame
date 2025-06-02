@@ -2,7 +2,7 @@
 
 A simplified implementation of a **Coup-style turn-based strategy game** written in modern C++17, featuring role-specific abilities, turn management, and a basic GUI using **SFML**.
 
-## 📦 Features
+## Features
 
 - Full game logic modeled after Coup-like mechanics:
   - Turn-based action system
@@ -16,15 +16,14 @@ A simplified implementation of a **Coup-style turn-based strategy game** written
 - Modular codebase with unit tests
 - Memory safe: fully tested with **Valgrind**
 
-## 🔧 Requirements
+## Requirements
 
 - C++17 compatible compiler (GCC, Clang, etc.)
 - SFML library (graphics, window, system modules)
-- GNU Make
 - Valgrind (optional, for memory testing)
 - Doctest (included in tests)
 
-## 🛠️ Build Instructions
+## Build Instructions
 
 ### 1. Clone the Repo
 
@@ -37,14 +36,12 @@ cd coup-game
 
 ```bash
 make
-./Main
 ```
 
 ### 3. Build the GUI
 
 ```bash
 make gui
-./gui
 ```
 
 ### 4. Run Unit Tests
@@ -57,21 +54,18 @@ make test
 
 ```bash
 make valgrind      # For core game logic tests
-valgrind ./gui     # For GUI (optional, may give noisy output)
 ```
 
-## 👥 Roles Overview
+| **Role**     | **Description**                                                                                                                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Governor** | Gains 3 coins (instead of 2) when using **tax**. Can cancel other players’ **tax** actions.                                                                                      |
+| **Spy**      | Can **peek** at others’ coin counts. Can prevent them from using **arrest** on their next turn.                                                                                  |
+| **Baron**    | Can **invest** 3 coins to receive 6 coins. If targeted by a **sanction**, receives 1 coin as compensation.                                                                       |
+| **General**  | Can pay 5 coins to **block a coup** against himself or another player. If targeted by **arrest**, he gets his coin back.                                                         |
+| **Judge**    | Can **cancel a bribe**, causing the other player to lose the 4 coins paid. If targeted by **sanction**, the attacker must pay 1 extra coin to the bank.                          |
+| **Merchant** | If they **start their turn with at least 3 coins**, they receive 1 bonus coin. If targeted by **arrest**, they pay 2 coins to the bank instead of giving 1 coin to the attacker. |
 
-| Role      | Description                                                       |
-|-----------|-------------------------------------------------------------------|
-| Governor  | Can tax for 2 coins                                               |
-| Spy       | Peeks at others’ coin counts, can bribe                           |
-| Baron     | Invests to grow coin count quickly                                |
-| General   | Can arrest and block coup if they have 5+ coins                   |
-| Judge     | Can block bribes                                                  |
-| Merchant  | Gets a bonus coin at the start of their turn                      |
-
-## 🧪 Testing
+## Testing
 
 - `doctest` framework used for unit testing
 - Covers core logic, edge cases, illegal moves
@@ -82,7 +76,7 @@ valgrind ./gui     # For GUI (optional, may give noisy output)
 [doctest] assertions: 46 | 46 passed | 0 failed
 ```
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 .
@@ -100,17 +94,9 @@ valgrind ./gui     # For GUI (optional, may give noisy output)
 └── README.md
 ```
 
-## 📌 Notes
+## Notes
 
 - Game ends when only one player remains active
 - All illegal actions throw clear exceptions
 - GUI shows each turn and action with basic visual feedback
 
-## 📄 License
-
-MIT License — free to use and modify.
-
-## 🙌 Credits
-
-Developed by [Your Name]  
-Special thanks to course staff and open-source tools like SFML and Doctest.
