@@ -96,8 +96,7 @@ int main()
         {"Cancel Bribe (Judge)", ActionMode::JudgeCancelBribe},
         {"Peek Coins (Spy)", ActionMode::SpyPeek},
         {"Invest (Baron)", ActionMode::BaronInvest},
-        {"Block Coup (General)", ActionMode::GeneralBlockCoup}
-    };
+        {"Block Coup (General)", ActionMode::GeneralBlockCoup}};
 
     for (size_t i = 0; i < rolePerks.size(); ++i)
     {
@@ -435,6 +434,27 @@ int main()
         modeLabel.setFillColor(sf::Color::Cyan);
         modeLabel.setPosition(10, 580);
         window.draw(modeLabel);
+
+        // Display winner if game is over
+        try
+        {
+            std::string winner = game.winner();
+            sf::Text winnerText(" Winner: " + winner, font, 36);
+            winnerText.setFillColor(sf::Color::Green);
+            winnerText.setStyle(sf::Text::Bold);
+            winnerText.setPosition(250, 300);
+            window.draw(winnerText);
+        }
+        catch (const std::exception &)
+        {
+            // Game not over, no winner
+        }
+
+        if (showError && errorClock.getElapsedTime().asSeconds() > 2.f)
+        {
+            showError = false;
+            errorText.setString("");
+        }
 
         if (showError)
             window.draw(errorText);
