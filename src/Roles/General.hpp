@@ -11,16 +11,9 @@ struct General : Player
 
     std::string role() const override { return "General"; }
 
- 
-    void arrest(Player &target) override
+    void onArrested() override
     {
-        if (game_.turn() != name_)
-            throw IllegalAction("Not " + name_ + "'s turn");
-        if (!target.isActive())
-            throw IllegalAction("Target not active");
-
-        stealCoins(target, 1);
-        game_.nextTurn();
+        changeCoins(+1);
     }
 
     // Block a coup: pay 5 coins and immediately react
@@ -31,8 +24,11 @@ struct General : Player
         if (coins() < 5)
             throw IllegalAction("Need 5 coins to block coup");
 
-        changeCoins(-5);
-        game_.blockArrest(attacker.name());
+        // Attempt to block a pending coup
+        if (!game_.blockCoup(attacker.name()))
+            throw IllegalAction("No pending coup from " + attacker.name());
+
+        changeCoins(-5); // Pay 5 coins to block the coup
         game_.nextTurn();
     }
 };

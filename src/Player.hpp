@@ -42,6 +42,7 @@ public:
     virtual void startTurn() { hasPeekedThisTurn = false; }
 
     virtual void onArrested() {}
+    virtual int sanctionPenalty() const { return 0; }
 
     // Role name for GUI/debug
     virtual std::string role() const { return "Player"; }

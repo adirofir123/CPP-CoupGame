@@ -115,15 +115,18 @@ void Player::arrest(Player &target)
     target.onArrested();
 
     // --- MERCHANT ---
-    if (auto *merchant = dynamic_cast<Merchant *>(&target)) {
+    if (auto *merchant = dynamic_cast<Merchant *>(&target))
+    {
         if (merchant->coins() < 2)
             throw IllegalAction("Merchant must have at least 2 coins to be arrested");
         merchant->changeCoins(-2); // Lose 2 to the bank
         // Attacker gains nothing
     }
     // --- GENERAL ---
-    else if (auto *general = dynamic_cast<General *>(&target)) {
-        if (general->coins() > 0) {
+    else if (auto *general = dynamic_cast<General *>(&target))
+    {
+        if (general->coins() > 0)
+        {
             general->changeCoins(-1); // General loses 1
             changeCoins(+1);          // Attacker gains 1
             general->changeCoins(+1); // General regains 1 (net 0)
@@ -131,8 +134,10 @@ void Player::arrest(Player &target)
         // If general has 0 coins, nothing happens
     }
     // --- DEFAULT CASE ---
-    else {
-        if (target.coins() > 0) {
+    else
+    {
+        if (target.coins() > 0)
+        {
             target.changeCoins(-1);
             changeCoins(+1);
         }
@@ -140,16 +145,18 @@ void Player::arrest(Player &target)
     }
 
     // --- Bribe logic ---
-    if (bribeActionsLeft > 0) {
+    if (bribeActionsLeft > 0)
+    {
         bribeActionsLeft--;
         if (bribeActionsLeft == 0)
             game_.nextTurn();
         // else: stay on player for next bribe action
-    } else {
+    }
+    else
+    {
         game_.nextTurn();
     }
 }
-
 
 void Player::sanction(Player &target)
 {
@@ -160,12 +167,13 @@ void Player::sanction(Player &target)
     if (coins_ < 3)
         throw IllegalAction("Not enough coins to apply sanction");
 
-    changeCoins(-3);
-    if (dynamic_cast<Judge *>(&target))
-    {
-        changeCoins(-1); // Extra penalty when sanctioning Judge
-    }
+    int penalty = target.sanctionPenalty(); // Default is 0 unless overridden
+    if (coins_ < 3 + penalty)
+        throw IllegalAction("Not enough coins to sanction this player (additional penalty required)");
+
+    changeCoins(-3 - penalty); // Subtract full cost including penalty
     target.setSanctioned(true);
+
     if (bribeActionsLeft > 0)
     {
         bribeActionsLeft--;
@@ -173,7 +181,7 @@ void Player::sanction(Player &target)
         {
             game_.nextTurn();
         }
-        // Stay on player for next bonus action, or pass if that was last
+        // Otherwise, allow another bonus action
     }
     else
     {
@@ -194,8 +202,8 @@ void Player::coup(Player &target)
     // Deduct 7 coins immediately
     changeCoins(-7);
 
-    // Immediately eliminate the target
-    game_.eliminate(target.name());
+    // Delay elimination until next turn
+    game_.recordPendingCoup(this, &target);
 
     // End turn (or bribe bonus logic)
     if (bribeActionsLeft > 0)
@@ -212,4 +220,3 @@ void Player::coup(Player &target)
         game_.nextTurn();
     }
 }
-

@@ -23,6 +23,14 @@ struct Spy : Player
         return target.coins();
     }
 
+    // Prevent a target player from using arrest on their next turn
+    void blockArrest(Player &target)
+    {
+        if (!target.isActive())
+            throw IllegalAction("Target not active");
+        game_.blockArrest(target.name());
+    }
+
     void startTurn() override
     {
         hasPeekedThisTurn = false; // Reset peek-per-turn flag

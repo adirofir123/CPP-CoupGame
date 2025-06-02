@@ -68,12 +68,29 @@ void Game::eliminate(const std::string &name)
     throw IllegalAction("Player '" + name + "' not found");
 }
 
-// Advance to the next active player
 void Game::nextTurn()
 {
     if (players_.empty())
         throw IllegalAction("No players to advance turn");
 
+    // Finalize any pending coups by current player
+    for (auto it = pendingCoups.begin(); it != pendingCoups.end();)
+    {
+        if (it->attacker == players_[currentIndex_])
+        {
+            if (!it->blocked && it->victim->isActive())
+            {
+                eliminate(it->victim->name());
+            }
+            it = pendingCoups.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    // Advance to next active player
     size_t n = players_.size();
     for (size_t i = 1; i <= n; ++i)
     {
@@ -81,17 +98,13 @@ void Game::nextTurn()
         if (players_[idx]->isActive())
         {
             currentIndex_ = idx;
-            // Clear any existing sanction on this player
+
+            // Reset state for new player
             players_[currentIndex_]->setSanctioned(false);
-
-            // Clear any pending arrest-block for this player
             clearArrestBlock(players_[currentIndex_]->name());
-
-            // Clear leftover bribe bonus actions
             players_[currentIndex_]->resetBribeActions();
+            players_[currentIndex_]->startTurn(); // Role-specific logic
 
-            // Call startTurn hook
-            players_[currentIndex_]->startTurn();
             return;
         }
     }
@@ -100,24 +113,31 @@ void Game::nextTurn()
 }
 
 // Return the winner if only one active player remains
-std::string Game::winner() const {
-    std::vector<Player*> alive;
+std::string Game::winner() const
+{
+    std::vector<Player *> alive;
 
-    for (auto* p : players_) {
-        if (p->isActive()) {
+    for (auto *p : players_)
+    {
+        if (p->isActive())
+        {
             alive.push_back(p);
         }
     }
 
-    if (alive.size() == 1) {
+    if (alive.size() == 1)
+    {
         return alive.front()->name();
-    } else if (alive.empty()) {
+    }
+    else if (alive.empty())
+    {
         throw IllegalAction("No active players remaining.");
-    } else {
+    }
+    else
+    {
         throw IllegalAction("Game still in progress");
     }
 }
-
 
 // Record that a player just took a Tax of 'amount' coins
 void Game::recordTax(Player *p, int amount)
@@ -167,4 +187,22 @@ bool Game::isArrestBlocked(const std::string &name) const
 void Game::clearArrestBlock(const std::string &name)
 {
     blockedFromArrest.erase(name);
+}
+
+void Game::recordPendingCoup(Player *attacker, Player *victim)
+{
+    pendingCoups.push_back({attacker, victim, false});
+}
+
+bool Game::blockCoup(const std::string &attackerName)
+{
+    for (auto &coup : pendingCoups)
+    {
+        if (!coup.blocked && coup.attacker->name() == attackerName)
+        {
+            coup.blocked = true;
+            return true;
+        }
+    }
+    return false;
 }

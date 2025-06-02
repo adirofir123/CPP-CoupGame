@@ -19,4 +19,14 @@ struct Merchant : Player
             changeCoins(+1);
         }
     }
+
+    void onArrested() override
+    {
+        if (coins() < 2)
+        {
+            throw IllegalAction("Merchant must have at least 2 coins to be arrested");
+        }
+        changeCoins(-2); // Lose 2 coins to bank
+        // Attacker gets nothing
+    }
 };
