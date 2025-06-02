@@ -1,164 +1,116 @@
-Coup-Style C++ Game (Project 3)
-Author: adirofir123@gmail.com
+# Coup-Style Turn-Based Game in C++
 
-Project Overview
-This repository contains a simplified C++ implementation of a “Coup-style” card game.
-Players take on one of six roles—each with unique special abilities—and attempt to be the last active player remaining.
+A simplified implementation of a **Coup-style turn-based strategy game** written in modern C++17, featuring role-specific abilities, turn management, and a basic GUI using **SFML**.
 
-Roles implemented:
+## 📦 Features
 
-Governor: Tax action yields 3 coins (versus base 2). Can block (undo) another Governor’s Tax and steal 2 coins.
+- Full game logic modeled after Coup-like mechanics:
+  - Turn-based action system
+  - Role-specific abilities: Governor, Spy, Baron, General, Judge, Merchant
+  - Sanction, Bribe, Arrest, Coup mechanics
+  - Reactions and blocks with delayed logic
+  - Custom exceptions for illegal actions
+- Enforces all game rules (e.g. mandatory coup at 10+ coins)
+- Headless demo mode (`Demo.cpp`)
+- **SFML GUI** frontend (`main_gui.cpp`)
+- Modular codebase with unit tests
+- Memory safe: fully tested with **Valgrind**
 
-Spy: Can “peek” at any other player’s coins (reveals their coin count) instead of taking coins.
+## 🔧 Requirements
 
-Baron: “Invest” action: pay 3 coins → instantly gain 6.
+- C++17 compatible compiler (GCC, Clang, etc.)
+- SFML library (graphics, window, system modules)
+- GNU Make
+- Valgrind (optional, for memory testing)
+- Doctest (included in tests)
 
-General: When arresting, regains +1 extra coin. Can (stub-block) an incoming Coup by paying 5.
+## 🛠️ Build Instructions
 
-Judge: Can undo (block) another player’s Bribe, refunding 4 coins back to them.
+### 1. Clone the Repo
 
-Merchant: When performing Arrest, target pays 2 coins to the bank (instead of losing 1 to the arresting player).
+```bash
+git clone https://github.com/YOUR_USERNAME/coup-game.git
+cd coup-game
+```
 
-Core flow:
+### 2. Build the Demo Game
 
-At the start of each turn, a player may choose one of:
-
-Gather: +1 coin (blockable by Sanction)
-
-Tax: +2 coins (blockable by Governor, unless Governor themselves)
-
-Bribe: pay 4 coins to take another immediate action
-
-Arrest: choose a target, steal 1 coin, eliminate them
-
-Sanction: pay 3 coins to prevent one target from using Gather/Tax next turn
-
-Coup: pay 7 coins to eliminate a target immediately (blockable by General)
-
-Directory Structure
-java
-Copy
-Edit
-Project3/
-├── arial.ttf                 ← Font file (TrueType) used by SFML GUI
-├── Demo.cpp                  ← Console demo showing sample gameplay
-├── main_gui.cpp              ← SFML-based GUI source
-├── Makefile                  ← Build/test/gui/valgrind/clean rules
-├── README.md                 ← This file
-├── src/
-│   ├── Game.hpp              ← Manages turn order, elimination, undo‐tracking
-│   ├── Game.cpp
-│   ├── Player.hpp            ← Base class (gather, tax, bribe, arrest, etc.)
-│   ├── Player.cpp
-│   ├── Role.hpp              ← Default stub “blocking” interface
-│   ├── Role.cpp
-│   └── Roles/
-│       ├── Governor.hpp      ← Overrides Tax (+3) & undo(Tax)
-│       ├── Spy.hpp           ← Overrides peekCoins()
-│       ├── Baron.hpp         ← Overrides invest()
-│       ├── General.hpp       ← Overrides arrest (regain +1) & stub undo(Coup)
-│       ├── Judge.hpp         ← Overrides undo(Bribe) → refund 4
-│       └── Merchant.hpp      ← Overrides arrest(target) → target pays 2
-└── tests/
-    ├── test_game.cpp         ← Tests for Game (turns, eliminate, winner)
-    ├── test_player.cpp       ← Tests for Player (gather, tax, bribe, arrest, sanction, coup)
-    └── test_roles.cpp        ← Tests for role-specific behaviors & blocking
-Build & Run
-Prerequisites
-C++17 build tools (g++).
-
-doctest: already included under tests/ as a single‐header.
-
-SFML (for GUI) & a TrueType font (arial.ttf).
-
-On WSL (Windows 10) you’ll need an external X server (e.g. VcXsrv or Xming).
-
-On WSL (Windows 11) you can use WSLg (built‐in), no extra X server needed.
-
-1) Clone & Enter
-bash
-Copy
-Edit
-git clone <your-repo-URL> Project3
-cd Project3
-2) Build Demo + Tests (default)
-go
-Copy
-Edit
+```bash
 make
-This runs Main (the console demo), then runs test_runner (all unit tests).
+./Main
+```
 
-Expected output:
+### 3. Build the GUI
 
-less
-Copy
-Edit
---- Running Main ---
-(console demo steps...)
---- Running Tests ---
-[doctest] test cases: 11 | 11 passed | 0 failed | 0 skipped
-[doctest] Status: SUCCESS!
-3) Run Only Tests
-bash
-Copy
-Edit
-make test
-Compiles and runs the unit tests.
-
-4) Build & Run the GUI
-Note: Ensure a working X11/Wayland environment (VcXsrv/Xming on Windows 10, or WSLg on Windows 11). Also place arial.ttf in the project root (same folder as Makefile).
-
-go
-Copy
-Edit
+```bash
 make gui
-Compiles main_gui.cpp with SFML flags (-lsfml-graphics -lsfml-window -lsfml-system).
+./gui
+```
 
-Immediately launches an SFML window showing:
+### 4. Run Unit Tests
 
-Left: list of active players (Name : coins), with a blue highlight on the current turn.
+```bash
+make test
+```
 
-Bottom: six buttons: Gather, Tax, Bribe, Arrest, Sanction, Coup.
+### 5. Run Valgrind (Memory Leak Check)
 
-Click an action button. If it’s a two-step action (Arrest/Sanction/Coup), you then click the target’s name in the list.
+```bash
+make valgrind      # For core game logic tests
+valgrind ./gui     # For GUI (optional, may give noisy output)
+```
 
-5) Memory‐Leak Check with Valgrind
-go
-Copy
-Edit
-make valgrind
-Rebuilds tests (if needed) and runs under Valgrind.
+## 👥 Roles Overview
 
-Expect “All heap blocks were freed — no leaks are possible.”
+| Role      | Description                                                       |
+|-----------|-------------------------------------------------------------------|
+| Governor  | Can tax for 2 coins                                               |
+| Spy       | Peeks at others’ coin counts, can bribe                           |
+| Baron     | Invests to grow coin count quickly                                |
+| General   | Can arrest and block coup if they have 5+ coins                   |
+| Judge     | Can block bribes                                                  |
+| Merchant  | Gets a bonus coin at the start of their turn                      |
 
-6) Cleanup
-go
-Copy
-Edit
-make clean
-Removes executables: Main, test_runner, and gui.
+## 🧪 Testing
 
-Design Notes
-Turn Logic:
-Each action method (e.g. gather(), tax(), bribe(), etc.) throws IllegalAction if it isn’t that player’s turn. On success, it calls game_.nextTurn(), which jumps to the next active player in join order.
+- `doctest` framework used for unit testing
+- Covers core logic, edge cases, illegal moves
+- Example output:
 
-“Undo” / Blocking is tracked in Game via two containers:
+```
+[doctest] test cases: 16 | 16 passed | 0 failed
+[doctest] assertions: 46 | 46 passed | 0 failed
+```
 
-lastTaxes: unordered_map<Player*,int> stores how many coins each player gained with their last tax().
+## 🗂️ Project Structure
 
-Game::undoTax(player) removes that entry and returns the coin count to be stolen/returned.
+```
+.
+├── src/                # Core logic: Game, Player, Roles
+│   ├── Game.cpp
+│   ├── Player.cpp
+│   └── Roles/
+├── tests/              # Unit tests (Doctest)
+│   ├── test_game.cpp
+│   ├── test_player.cpp
+│   └── test_roles.cpp
+├── main_gui.cpp        # SFML GUI frontend
+├── Demo.cpp            # CLI-based demo game
+├── Makefile
+└── README.md
+```
 
-lastBribes: unordered_map<Player*,bool> records whether a player has just performed bribe().
+## 📌 Notes
 
-Game::undoBribe(player) checks and clears that flag, indicating a valid block for bribe.
+- Game ends when only one player remains active
+- All illegal actions throw clear exceptions
+- GUI shows each turn and action with basic visual feedback
 
-Public helper methods in Player for role classes:
+## 📄 License
 
-addCoins(int) to give a target coins (used by Judge to refund).
+MIT License — free to use and modify.
 
-stealCoins(Player&,int) to move coins from target → this (used by Governor, General, etc.).
+## 🙌 Credits
 
-penalize(Player&,int) to remove coins from the target (used by Merchant).
-
-Role-specific overrides live in src/Roles/. Each override checks turn, availability/cost, applies its special effect, and then calls game_.nextTurn().
-
+Developed by [Your Name]  
+Special thanks to course staff and open-source tools like SFML and Doctest.
